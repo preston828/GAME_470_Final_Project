@@ -17,7 +17,6 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     [SyncVar] public string playerReadyStatus = "Unready";
     [SyncVar(hook = nameof(PlayerTeamUpdate))] public string playerTeam;
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerUsername; //when "Playerusername" will sync update hook function will be called on all clients
-
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool isPlayerReady = false;
 
     //Manager
@@ -55,7 +54,7 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     public override void OnStartClient()
     {
         Manager.gamePlayers.Add(this);
-        Debug.Log("Client Start: Called on requesting client. MAnager: " + Manager.gamePlayers.Count);
+        Debug.Log("Client Start: Called on requesting client. Manager: " + Manager.gamePlayers.Count);
     }
 
     public override void OnStopClient()
@@ -94,6 +93,13 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     private void PlayerTeamUpdate(string oldValue, string newValue)
     {
         LobbyController.Instance.UpdatePlayerList();
+    }
+    public void ChangeTeamValue_onPressAction(string teamName)
+    {
+        if (isOwned)
+        {
+            Cmd_SetPlayerTeam(teamName);
+        }
     }
 
 

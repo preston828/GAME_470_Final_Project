@@ -34,7 +34,16 @@ public class CustomNetworkManager : NetworkManager
                 gamePlayers.Count
                 );
 
-            Debug.Log("CONN ID: " + gamePlayerInstance.connectionId + " | STEAM ID: " +  gamePlayerInstance.playerSteamId);
+            if(gamePlayerInstance.playerIdNumber % 2 == 1) //Host and other odd numbered clients (1,3,5,7,9,11,13,15,17,19,21)
+            {
+                gamePlayerInstance.playerTeam = "Blue";
+            }
+            else //1st client to join and other even numbered clients (2,4,6,8,10,12,14,16,18,20)
+            {
+                gamePlayerInstance.playerTeam = "Red";
+            }
+
+                Debug.Log("CONN ID: " + gamePlayerInstance.connectionId + " | STEAM ID: " + gamePlayerInstance.playerSteamId);
 
             //Adds the player on the server, via the network (mirror syncs to all clients)
             NetworkServer.AddPlayerForConnection(conn, gamePlayerInstance.gameObject);

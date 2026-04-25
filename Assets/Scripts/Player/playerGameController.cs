@@ -11,6 +11,7 @@ public class playerGameController : NetworkBehaviour
     public Camera playerCamera;
     public Weapon playerWeapon;
     public Text playerHealthText;
+    public Text playerTeamText;
 
     [SyncVar (hook = nameof(OnCameraRotated))] private Quaternion cameraRotation;
 

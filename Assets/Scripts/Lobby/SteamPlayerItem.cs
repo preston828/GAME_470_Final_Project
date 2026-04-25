@@ -20,12 +20,14 @@ public class SteamPlayerItem : MonoBehaviour
     public Toggle ReadyStatusToggle;
     public PlayerObjectController playerObjectController;
 
+    //Player Team Variables
+    public string playerTeam;
+    public Text playerTeamText;
+
     //Player Steam Image Variables
     public RawImage playerImage = null;
     private bool steamImageReceived = false;
     protected Callback<AvatarImageLoaded_t> ImageLoaded;
-
-    public string playerTeam;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,6 +39,8 @@ public class SteamPlayerItem : MonoBehaviour
     public void SetPlayerValues()
     {
         playerPersonaText.text = playerUsername;
+        playerTeamText.text = playerTeam;
+
         ChangeReadyStatus();
         if (!steamImageReceived)
         {
@@ -107,30 +111,35 @@ public class SteamPlayerItem : MonoBehaviour
         playerObjectController.ChangeReadyStatus_tglAction();
     }
 
-    public void SetPositionOnCanvas()
+    public void ChangeTeam()
     {
-        
-        switch (connectionId)
+        if(playerTeam == "Blue")
         {
-            case 0:
-                this.gameObject.transform.localPosition = new Vector3((float)187.5, (float)(-212.5), 0);
-                break;
-            case 1:
-                this.gameObject.transform.localPosition = new Vector3((float)-195, (float)(-212.5), 0);
-                break;
-            case 2:
-                this.gameObject.transform.localPosition = new Vector3(570, (float)(-212.5), 0);
-                break;
-            case 3:
-                this.gameObject.transform.localPosition = new Vector3((float)-577.5, (float)(-212.5), 0);
-                break;
-            case 4:
-                this.gameObject.transform.localPosition = new Vector3((float)(952.5), (float)(-212.5), 0);
-                break;
+            playerTeam = "Red";
+        }
+        else
+        {
+            playerTeam = "Blue";
         }
 
+        playerTeamText.text = playerTeam;
     }
 
-    
+    public void OnTryChangeTeamPress() //Attempts to update the players team value
+    {
+        if (playerTeam == "Blue")
+        {
+            playerObjectController.ChangeTeamValue_onPressAction("Red"); //Pass in oposite of current team
+        }
+        else
+        {
+            playerObjectController.ChangeTeamValue_onPressAction("Blue"); //Pass in oposite of current team
+        }
+    }
+
+    public GameObject GetGameObjectScriptAttachedTo()
+    {
+        return gameObject;
+    }
 
 }

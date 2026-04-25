@@ -13,9 +13,11 @@ public class LobbyController : MonoBehaviour
     public Text lobbyNameText;
     public ulong currentLobbyId;
 
-    
-    public GameObject lobbyCanvasObject;
     public GameObject playerListItemPrefab;
+
+    //Team Containers
+    public GameObject blueTeamContainer;
+    public GameObject redTeamContainer;
 
     //Player
     public GameObject localPlayerObject;
@@ -91,11 +93,11 @@ public class LobbyController : MonoBehaviour
             newSteamPlayerItem.playerUsername = player.playerUsername;
             newSteamPlayerItem.connectionId = player.connectionId;
             newSteamPlayerItem.playerSteamId = player.playerSteamId;
+            newSteamPlayerItem.playerTeam = player.playerTeam;
             newSteamPlayerItem.SetPlayerValues();
 
-            //Transform Prefab
-            newPlayerListItem.transform.SetParent(lobbyCanvasObject.transform);
-            newSteamPlayerItem.SetPositionOnCanvas();
+            //Put Prefab in Team Container
+            UpdatePlayerTeamContainer(newSteamPlayerItem);
 
             //Ready Status
             newSteamPlayerItem.isPlayerReady = player.isPlayerReady;
@@ -123,9 +125,8 @@ public class LobbyController : MonoBehaviour
                 newSteamPlayerItem.playerSteamId = player.playerSteamId;
                 newSteamPlayerItem.SetPlayerValues();
 
-                //Transform Prefab
-                newPlayerListItem.transform.SetParent(lobbyCanvasObject.transform);
-                newSteamPlayerItem.SetPositionOnCanvas();
+                //Put Prefab in Team Container
+                UpdatePlayerTeamContainer(newSteamPlayerItem);
 
                 //Ready Status
                 newSteamPlayerItem.isPlayerReady = player.isPlayerReady;
@@ -147,8 +148,11 @@ public class LobbyController : MonoBehaviour
                 {
                     playerItemScript.playerUsername = player.playerUsername;
                     playerItemScript.isPlayerReady = player.isPlayerReady;
-                    playerItemScript.SetPlayerValues();
                     playerItemScript.playerTeam = player.playerTeam;
+                    playerItemScript.SetPlayerValues();
+
+                    //Put Prefab in Updated Team Container
+                    UpdatePlayerTeamContainer(playerItemScript);
                 }
             }
         }
@@ -183,6 +187,19 @@ public class LobbyController : MonoBehaviour
         }
 
         CheckAllReady();
+    }
+
+    private void UpdatePlayerTeamContainer(SteamPlayerItem playerLobbyItem)
+    {
+        //Set Prefab in Team Container
+        if (playerLobbyItem.playerTeam == "Blue")
+        {
+            playerLobbyItem.GetGameObjectScriptAttachedTo().transform.SetParent(blueTeamContainer.transform);
+        }
+        else
+        {
+            playerLobbyItem.GetGameObjectScriptAttachedTo().transform.SetParent(redTeamContainer.transform);
+        }
     }
 
     public void FindLocalPlayer()

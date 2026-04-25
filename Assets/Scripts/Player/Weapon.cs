@@ -7,6 +7,10 @@ public class Weapon : NetworkBehaviour
     public GameObject shotImpact_prefab;
     public AudioClip shoot_audio;
 
+
+    public int defaultDamagePerShot = -1;
+    public int damagePerShot = -1;
+
     public void Shoot(Vector3 shootFromPoint, Vector3 shootDir)
     {
         int origLayer = playerObjectRef.layer;
@@ -37,5 +41,15 @@ public class Weapon : NetworkBehaviour
         GameObject impactObj = Instantiate(shotImpact_prefab, location, Quaternion.identity);
 
         Destroy(impactObj, 5f);
+    }
+
+    public void ModifyDamagePerShotValue(int newDamageValue)
+    {
+        damagePerShot = newDamageValue;
+    }
+
+    public void ResetDamagePerShotValue()
+    {
+        damagePerShot = defaultDamagePerShot;
     }
 }
