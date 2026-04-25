@@ -1,6 +1,7 @@
-using UnityEngine;
 using Mirror;
 using Steamworks;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenuSteamworksLobby : MonoBehaviour
@@ -11,15 +12,24 @@ public class MainMenuSteamworksLobby : MonoBehaviour
     public ulong currentLobbyID;
     private const string hostAddressKey = "HostAddress";
     public const string nameKey = "name";
-    public Button hostGame_btn;
-
-    //Generic
-    public Button quitGame_btn;
     public Canvas mainMenuCanvas;
+
+    //Main Menu Elements
+    public Button hostGame_btn;
+    public Button findGame_btn;
+    public Button quitGame_btn;
 
     //Player Settings
     public Slider gameVolume_slider;
     public int gameVolume = 1;
+
+    //Containers
+    public GameObject mainMenu_Container;
+    public GameObject findGame_Container;
+
+    //Find Game Elements
+    public GameObject GameLobbyItemPrefab;
+    private List<SteamGameLobbyItem> findGameLobbyList = new List<SteamGameLobbyItem>();
 
     //Callbacks
     protected Callback<LobbyCreated_t> LobbyCreated;
@@ -46,7 +56,7 @@ public class MainMenuSteamworksLobby : MonoBehaviour
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
     void Start()
     {
         if (!SteamManager.Initialized) { return; } //Means steam client must be open and running when we press play
@@ -64,8 +74,9 @@ public class MainMenuSteamworksLobby : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         hostGame_btn.gameObject.SetActive(true);
         mainMenuCanvas.gameObject.SetActive(true);
+        mainMenu_Container.gameObject.SetActive(true);
+        findGame_Container.gameObject.SetActive(false);
     }
-
 
     #region Buttons
     public void HostLobby()
@@ -73,9 +84,25 @@ public class MainMenuSteamworksLobby : MonoBehaviour
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, Manager.maxConnections);
         hostGame_btn.gameObject.SetActive(false);
         mainMenuCanvas.gameObject.SetActive(false);
+        mainMenu_Container.gameObject.SetActive(false);
+        findGame_Container.gameObject.SetActive(false);
     }
 
-    //Assignment 1
+    public void FindGame()
+    {
+        mainMenu_Container.gameObject.SetActive(false);
+        findGame_Container.gameObject.SetActive(true);
+        GetSteamFriendLobbies();
+    }
+
+    public void OnBackToMainMenuPress()
+    {
+        mainMenu_Container.gameObject.SetActive(true);
+        findGame_Container.gameObject.SetActive(false);
+        ClearFindGameLobbyList();
+    }
+
+    
     public void OnChangeVolumeSetting()
     {
         gameVolume = (int)gameVolume_slider.value / 100;
@@ -170,5 +197,52 @@ public class MainMenuSteamworksLobby : MonoBehaviour
     }
 
     #endregion Lobby Management
+
+
+    private void GetSteamFriendLobbies()
+    {
+        ClearFindGameLobbyList();
+
+        int friendsCount = SteamFriends.GetFriendCount(EFriendFlags.k_EFriendFlagImmediate);
+        int currentPlayingGame = 0;
+
+        if(friendsCount == -1)
+        {
+            Debug.LogError("Friend count returned at -1, Steam is not open, or user is not logged in");
+            friendsCount = 0;
+        }
+
+        //Check online friends
+        for(int i = 0; i < friendsCount; i++)
+        {
+            CSteamID friendSteamID = SteamFriends.GetFriendByIndex(i, EFriendFlags.k_EFriendFlagImmediate);
+            string friendUsername = SteamFriends.GetFriendPersonaName(friendSteamID);
+            FriendGameInfo_t friendGameInfo;
+
+            //Check if friend is playing a game
+            if(SteamFriends.GetFriendGamePlayed(friendSteamID, out friendGameInfo))
+            {
+                if(friendGameInfo.m_gameID == new CGameID(480))
+                {
+                    SteamGameLobbyItem steamGameLobbyItem = Instantiate(GameLobbyItemPrefab).GetComponent<SteamGameLobbyItem>();
+                    steamGameLobbyItem.InitializeSteamGameLobbyItem(friendGameInfo.m_steamIDLobby, friendSteamID, friendUsername);
+                    currentPlayingGame++;
+                }
+            }
+        }
+    }
+
+    private void ClearFindGameLobbyList()
+    {
+        //Clear out all lobbys listed already
+        if (findGameLobbyList.Count > 0)
+        {
+            foreach (SteamGameLobbyItem lobby in findGameLobbyList)
+            {
+                Destroy(lobby.gameObject);
+            }
+            findGameLobbyList.Clear();
+        }
+    }
 
 }

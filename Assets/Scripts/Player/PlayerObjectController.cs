@@ -5,8 +5,6 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 //using UnityEditor.SearchService;
 //using UnityEditor;
-using Unity.VisualScripting;
-using JetBrains.Annotations;
 
 public class PlayerObjectController : NetworkBehaviour //!!! Essential for all network stuff controlled by mirror
 {
@@ -17,6 +15,7 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     [SyncVar] public int playerIdNumber;
     [SyncVar] public ulong playerSteamId;
     [SyncVar] public string playerReadyStatus = "Unready";
+    [SyncVar(hook = nameof(PlayerTeamUpdate))] public string playerTeam;
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerUsername; //when "Playerusername" will sync update hook function will be called on all clients
 
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool isPlayerReady = false;
@@ -82,15 +81,18 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     private void PlayerNameUpdate(string oldValue, string newValue)
     {
         //This hook function will be called on ALL clients (incl. host)
+        LobbyController.Instance.UpdatePlayerList();
+    }
 
-        if (isServer) //If host
-        {
-            Debug.Log("On Host (server): " + this.playerUsername);
-        }
-        if(!isServer && isClient) //If client but not host
-        {
-            Debug.Log("On Non-Host Client: " + this.playerUsername);
-        }
+
+    //Player Team
+    [Command]
+    private void Cmd_SetPlayerTeam(string teamName)
+    {
+        this.playerTeam = teamName;
+    }
+    private void PlayerTeamUpdate(string oldValue, string newValue)
+    {
         LobbyController.Instance.UpdatePlayerList();
     }
 
@@ -105,7 +107,6 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     {
         LobbyController.Instance.UpdatePlayerList();
     }
-
     public void ChangeReadyStatus_tglAction()
     {
         if (isOwned) //If this game instance has authority on the gameObject calling the method
@@ -121,7 +122,6 @@ public class PlayerObjectController : NetworkBehaviour //!!! Essential for all n
     {
         Manager.StartGame(sceneName);
     }
-
     public void CanStartGame(string sceneName)
     {
         if (isOwned)

@@ -148,6 +148,7 @@ public class LobbyController : MonoBehaviour
                     playerItemScript.playerUsername = player.playerUsername;
                     playerItemScript.isPlayerReady = player.isPlayerReady;
                     playerItemScript.SetPlayerValues();
+                    playerItemScript.playerTeam = player.playerTeam;
                 }
             }
         }
